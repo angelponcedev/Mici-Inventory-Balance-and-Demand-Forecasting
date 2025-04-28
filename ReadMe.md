@@ -31,7 +31,7 @@ A desktop application designed for demand analysis and inventory balancing, deve
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/ShaddaiDeLuna/Talentland-2025.git
+    git clone https://github.com/angelponcedev/Mici-Inventory-Balance-and-Demand-Forecasting.git
     cd Talentland-2025
     ```
 2.  **Create a virtual environment**:
@@ -72,15 +72,10 @@ A desktop application designed for demand analysis and inventory balancing, deve
 6.  **Visualize Data**:
     *   The main table shows an overview of the selected products.
     *   Click on different products in the table to update the demand chart.
-7.  **Calculate Inventory Balance**:
-    *   Navigate to the "Additional Options & Actions" panel and ensure "Balance Calculation" is selected.
-    *   Select a product in the main table.
-    *   Enter numeric values for `Initial Stock`, `Receipts`, and `Safety Stock`.
-    *   Click `Calculate Balance` to see the calculated net demand based on the *total forecast* for the selected product over the horizon.
-8.  **Export to Power BI**:
+7.  **Export to Power BI**:
     *   select "Export to Power BI".
     *   Click `Export Data & Open PBIX`. This saves a `predicciones_forecast.csv` file and attempts to open `plantilla_forecast.pbix`.
-9.  **Send E-Mail**:
+8.  **Send E-Mail**:
     *   In the "Additional Options & Actions" panel, select "Export to Power BI".
     *   Click `Export Data & Open PBIX`. This saves a `predicciones_forecast.csv` file and attempts to open `plantilla_forecast.pbix`.
 
