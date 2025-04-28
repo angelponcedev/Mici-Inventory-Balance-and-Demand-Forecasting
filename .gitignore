@@ -1,0 +1,16 @@
+# .gitignore
+mici/
+entorno/
+__pycache__/
+*.pyc
+/forecast/Practica-6_RegresionLinealSimple.ipynb
+.env
+OrTools.py
+Pruebas/
+Talnet.code-workspace
+inputData.csv
+dataset/~$Hackaton DB Final 04.21.xlsx
+dataset/~$Hackaton DB Final 04.21 (4).xlsx
+Micron Hackathon Final 04.21.pdf
+Talent.code-Workspace
+dataset/cleaningDataSet.ipynb
