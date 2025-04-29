@@ -14,6 +14,7 @@ from boundaryPredictions.boundaryFactory import makeBoundaryPredictions
 import subprocess
 from ventana_correo import AplicacionCorreo
 from lpm.search import search
+from lpm.search import search_combined
 import os
 
 # --- Global Variables ---

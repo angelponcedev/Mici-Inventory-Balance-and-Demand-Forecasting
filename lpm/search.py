@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any, List, Tuple
 from lpm.lpm import mpl
 from lpm.WRITE import write , modify
+from lpm.lpm import mpl0
 
 def load_excel_data(file_path: str) -> Dict[str, pd.DataFrame]:
     """Carga todas las hojas necesarias del Excel en un dict."""
@@ -325,3 +326,250 @@ def search(FILE_PATH):
                 except KeyError as e:
                     print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
                     continue
+
+def search_combined(FILE_PATH):
+
+    #FILE_PATH = "D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21.xlsx"
+    #FILE_PATH = "../dataset/Hackaton DB Final 04.21.xlsx"
+    PRODUCTS = ["21A","22B","23C"]  # ,"22B","23C"
+    START_YEAR = 95     # para '95
+    quarter_counter = 0
+
+    all_data = load_excel_data(FILE_PATH)
+
+    for i in range(10):  # 8 years
+        current_year = START_YEAR + i
+        
+        for j in range(4):  # 4 quarters per year
+            current_quarter = j + 1
+            
+            # Skip Q1 and Q2 of the first year (95)
+            if current_year == START_YEAR and current_quarter < 3:
+                continue
+            if current_year == 104 and current_quarter >1:
+                break
+
+            quarter_counter += 1
+                
+            # Format quarter label
+            if current_year > 99:
+                # Handle years 100+
+                display_year = f"0{current_year - 100}" if current_year < 110 else f"{current_year - 100}"
+                #current_year=display_year
+                QUARTER = f"Q{current_quarter} {display_year}"
+            else:
+                QUARTER = f"Q{current_quarter} {current_year}"
+            
+            PRODUCT = PRODUCTS[0]
+            
+            if quarter_counter <=34:
+            # Get product data for the current quarter
+                try:
+                    all_data = load_excel_data(FILE_PATH)
+                    pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
+                    print(f"Processing: {PRODUCT}, {QUARTER}")
+                    
+                    WP, YS, TPIB, IBESST,S = mpl(
+                        n=len(pdict["available_capacity"]),
+                        safetyStockTarget=pdict["safety_stock"],
+                        totalDemand=pdict["total_demand"],
+                        totalProjectedInventoryBalance=pdict["inventory_balance"],
+                        densityPerWafer=pdict["density"],
+                        yieldPerProduct=pdict["yield_values"],
+                        availableCapacity=pdict["available_capacity"],
+                        minWeeklyProduction=350,
+                        maxDecrease=560,
+                        weeklyDemandRatio=pdict["weekly_ratio"],
+                        min=70000000,
+                        max=140000000,
+                    )
+                    
+                    print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
+                    
+                    # Write results to files
+                    print(pdict)
+
+                    write(WP, PRODUCT, QUARTER, FILE_PATH)
+                    modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+                    #print(pdict)
+                    
+                except KeyError as e:
+                    print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                    continue  # Skip to next iteration if data is missing
+
+            else:
+                try:
+                    all_data = load_excel_data(FILE_PATH)
+                    pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
+                    print(f"Processing: {PRODUCT}, {QUARTER}")
+                    
+                    WP, YS, TPIB, IBESST,S = mpl0(
+                        n=len(pdict["available_capacity"]),
+                        safetyStockTarget=pdict["safety_stock"],
+                        totalDemand=pdict["total_demand"],
+                        totalProjectedInventoryBalance=pdict["inventory_balance"],
+                        densityPerWafer=pdict["density"],
+                        yieldPerProduct=pdict["yield_values"],
+                        availableCapacity=pdict["available_capacity"],
+                        minWeeklyProduction=350,
+                        maxDecrease=560,
+                        weeklyDemandRatio=pdict["weekly_ratio"],
+                    )
+                    
+                    print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
+                    
+                    # Write results to files
+                    print(pdict)
+
+                    write(WP, PRODUCT, QUARTER, FILE_PATH)
+                    modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+                    #print(pdict)
+                    
+                except KeyError as e:
+                    print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                    continue  # Skip to next iteration if data is missing
+
+    START_YEAR = 95
+        # — Procesar productos 2 y 3 con lógica de rescate de capacidad —
+    for l in range(1, 3):
+        PRODUCT = PRODUCTS[l]
+        for i in range(10):  # 8 años
+            current_year = START_YEAR + i
+            for j in range(4):  # 4 trimestres
+                current_quarter = j + 1
+                # Saltar Q1 y Q2 del primer año
+                if current_year == START_YEAR and current_quarter < 3:
+                    continue
+                if current_year == 104 and current_quarter >1:
+                    break
+
+                quarter_counter += 1
+
+                # Formatear etiqueta de trimestre
+                if current_year > 99:
+                    display_year = (
+                        f"0{current_year - 100}"
+                        if current_year < 110
+                        else f"{current_year - 100}"
+                    )
+                else:
+                    display_year = f"{current_year}"
+                QUARTER = f"Q{current_quarter} {display_year}"
+
+                if quarter_counter <=34:
+                    try:
+                        all_data = load_excel_data(FILE_PATH)
+                        pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
+                        print(f"Processing: {PRODUCT}, {QUARTER}")
+
+                        # 1) Primera llamada a mpl
+                        WP, YS, TPIB, IBESST, S = mpl(
+                            n=len(pdict["available_capacity"]),
+                            safetyStockTarget=pdict["safety_stock"],
+                            totalDemand=pdict["total_demand"],
+                            totalProjectedInventoryBalance=pdict["inventory_balance"],
+                            densityPerWafer=pdict["density"],
+                            yieldPerProduct=pdict["yield_values"],
+                            availableCapacity=pdict["available_capacity"],
+                            minWeeklyProduction=350,
+                            maxDecrease=560,
+                            weeklyDemandRatio=pdict["weekly_ratio"],
+                            min=70000000,
+                            max=140000000,
+                        )
+
+                        # 2) Si falla (S == False) y hay un producto anterior, aplico rescate
+                        if not S and l > 0:
+                            prev_prod = PRODUCTS[l - 1]
+                            pdict_prev = get_product_data(
+                                all_data, prev_prod, current_quarter, current_year
+                            )
+                            # mpl del anterior para obtener WP_prev
+                            WP_prev, _, _, _, S_prev = mpl(
+                                n=len(pdict_prev["available_capacity"]),
+                                safetyStockTarget=pdict_prev["safety_stock"],
+                                totalDemand=pdict_prev["total_demand"],
+                                totalProjectedInventoryBalance=pdict_prev["inventory_balance"],
+                                densityPerWafer=pdict_prev["density"],
+                                yieldPerProduct=pdict_prev["yield_values"],
+                                availableCapacity=pdict_prev["available_capacity"],
+                                minWeeklyProduction=350,
+                                maxDecrease=560,
+                                weeklyDemandRatio=pdict_prev["weekly_ratio"],
+                                min=70000000,
+                                max=140000000,
+                            )
+
+                            # Calcular sobrantes semana a semana
+                            leftover = [
+                                prev_cap - used
+                                for prev_cap, used in zip(
+                                    pdict_prev["available_capacity"], WP_prev
+                                )
+                            ]
+
+                            # Ajustar capacidad disponible del producto actual
+                            pdict["available_capacity"] = [
+                                curr_cap + extra
+                                for curr_cap, extra in zip(
+                                    pdict["available_capacity"], leftover
+                                )
+                            ]
+
+                            # 3) Reintentar mpl con la capacidad ajustada
+                            WP, YS, TPIB, IBESST, S = mpl(
+                                n=len(pdict["available_capacity"]),
+                                safetyStockTarget=pdict["safety_stock"],
+                                totalDemand=pdict["total_demand"],
+                                totalProjectedInventoryBalance=pdict["inventory_balance"],
+                                densityPerWafer=pdict["density"],
+                                yieldPerProduct=pdict["yield_values"],
+                                availableCapacity=pdict["available_capacity"],
+                                minWeeklyProduction=350,
+                                maxDecrease=560,
+                                weeklyDemandRatio=pdict["weekly_ratio"],
+                                min=70000000,
+                                max=140000000,
+                            )
+
+                        # 4) Escritura de resultados
+                        print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, S={S}")
+
+                        write(WP, PRODUCT, QUARTER, FILE_PATH)
+                        modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+
+                    except KeyError as e:
+                        print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                        continue
+
+                else:
+                    try:
+                        all_data = load_excel_data(FILE_PATH)
+                        pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
+                        print(f"Processing: {PRODUCT}, {QUARTER}")
+                        
+                        WP, YS, TPIB, IBESST,S = mpl0(
+                            n=len(pdict["available_capacity"]),
+                            safetyStockTarget=pdict["safety_stock"],
+                            totalDemand=pdict["total_demand"],
+                            totalProjectedInventoryBalance=pdict["inventory_balance"],
+                            densityPerWafer=pdict["density"],
+                            yieldPerProduct=pdict["yield_values"],
+                            availableCapacity=pdict["available_capacity"],
+                            minWeeklyProduction=350,
+                            maxDecrease=560,
+                            weeklyDemandRatio=pdict["weekly_ratio"],
+                        )
+                        
+                        print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
+                        
+                        # Write results to files
+                        print(pdict)
+
+                        write(WP, PRODUCT, QUARTER, FILE_PATH)
+                        modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+                        #print(pdict)
+                        
+                    except KeyError as e:
+                        print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                        continue  # Skip to next iteration if data is missing
