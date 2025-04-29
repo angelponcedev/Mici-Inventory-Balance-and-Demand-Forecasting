@@ -64,8 +64,8 @@ def mpl(n,safetyStockTarget, totalDemand,totalProjectedInventoryBalance, density
         # El formato de scipy es A*y <= b.
         # Para y_t - y_{t+1} <= floor(maxDecrease / 5):
         row_smooth = [0] * n
-        row_smooth[i] = -1    # Coeficiente para y_t
-        row_smooth[i+1] = 1 # Coeficiente para y_{t+1}
+        row_smooth[i] = 1    # Coeficiente para y_t
+        row_smooth[i+1] = -1 # Coeficiente para y_{t+1}
         A_ub_list.append(row_smooth)
         b_ub_list.append(maxDecrease_y) # Usar el RHS ajustado
 
@@ -166,8 +166,8 @@ def mpl0(n,safetyStockTarget, totalDemand,totalProjectedInventoryBalance, densit
         # El formato de scipy es A*y <= b.
         # Para y_t - y_{t+1} <= floor(maxDecrease / 5):
         row_smooth = [0] * n
-        row_smooth[i] = -1    # Coeficiente para y_t
-        row_smooth[i+1] = 1 # Coeficiente para y_{t+1}
+        row_smooth[i] = 1    # Coeficiente para y_t
+        row_smooth[i+1] = -1 # Coeficiente para y_{t+1}
         A_ub_list.append(row_smooth)
         b_ub_list.append(maxDecrease_y) # Usar el RHS ajustado
 

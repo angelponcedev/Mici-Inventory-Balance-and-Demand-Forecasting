@@ -420,7 +420,7 @@ def callForecasting():
              print(f'Product {product.productID} boundaries ({len(product.boundaries)} total): {boundaries_str}')
              print(f'  Backtest MAPE: {mape_str}\n')
              
-    search(file)
+    search_combined(file)
     
 def generateBoundaryForecast():
     """

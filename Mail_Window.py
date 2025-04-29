@@ -19,7 +19,7 @@ class AplicacionCorreo:
         self.crear_interfaz()
 
     def crear_interfaz(self):
-        Label(self.ventana, text="ENVIAR CORREO VIA GMAIL", fg="white", bg="#030075", font=("Arial", 15, "bold"), padx=5, pady=5).grid(row=0, column=0, columnspan=2)
+        Label(self.ventana, text="SEND EMAIL VIA GMAIL", fg="white", bg="#030075", font=("Arial", 15, "bold"), padx=5, pady=5).grid(row=0, column=0, columnspan=2)
 
         imagen_gmail = Image.open("Assets/PNG/Asset 1.png")
         nueva_imagen = imagen_gmail.resize((125, 84))
@@ -30,26 +30,26 @@ class AplicacionCorreo:
         self.destinatario = StringVar()
         self.asunto = StringVar()
 
-        Label(self.ventana, text="Mi correo: 4751083696n@gmail.com", fg="white", bg="#030075",
+        Label(self.ventana, text="My email: includeici@gmail.com", fg="white", bg="#030075",
               font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=2, column=0, columnspan=2, pady=5)
 
-        Label(self.ventana, text="Destinatario:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=3, column=0)
+        Label(self.ventana, text="From:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=3, column=0)
         Entry(self.ventana, textvariable=self.destinatario, width=34).grid(row=3, column=1)
 
-        Label(self.ventana, text="Asunto:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=4, column=0)
+        Label(self.ventana, text="Subject:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=4, column=0)
         Entry(self.ventana, textvariable=self.asunto, width=34).grid(row=4, column=1)
 
-        Label(self.ventana, text="Mensaje:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=5, column=0)
+        Label(self.ventana, text="Compose email:", fg="white", background="#030075", font=("Arial", 10, "bold"), padx=5, pady=5).grid(row=5, column=0)
         self.mensaje = Text(self.ventana, height=5, width=28, padx=5, pady=5)
         self.mensaje.grid(row=5, column=1)
 
-        self.archivo_label = Label(self.ventana, text="Ningún archivo seleccionado", fg="gray", font=("Arial", 9))
+        self.archivo_label = Label(self.ventana, text="No file selected", fg="gray", font=("Arial", 9))
         self.archivo_label.grid(row=6, column=0, columnspan=2)
 
-        Button(self.ventana, text="SELECCIONAR ARCHIVO", command=self.seleccionar_archivo,
+        Button(self.ventana, text="SELECT FILE", command=self.seleccionar_archivo,
                height=2, width=20, bg="gray", fg="white", font=("Arial", 9)).grid(row=7, column=0, columnspan=2, padx=5, pady=5)
 
-        Button(self.ventana, text="ENVIAR", command=self.enviar_email,
+        Button(self.ventana, text="Send", command=self.enviar_email,
                height=2, width=10, bg="#FFC40A", fg="black", font=("Arial", 10, "bold")).grid(row=8, column=0, columnspan=2, padx=5, pady=10)
 
     def seleccionar_archivo(self):
@@ -59,8 +59,8 @@ class AplicacionCorreo:
             self.archivo_label.config(text=f"📎 Archivo: {nombre_archivo}", fg="green")
 
     def enviar_email(self):
-        remitente = "4751083696n@gmail.com"
-        contrasena = "zras kris sqga zuob"
+        remitente = "includeici@gmail.com"
+        contrasena = "lhld bbxr pjeg rwea"
 
         email = EmailMessage()
         email["From"] = remitente
@@ -83,6 +83,6 @@ class AplicacionCorreo:
             smtp.login(remitente, contrasena)
             smtp.send_message(email)
             smtp.quit()
-            messagebox.showinfo("", "Mensaje enviado correctamente.")
+            messagebox.showinfo("", "Message sent successfully.")
         except Exception as e:
-            messagebox.showerror("ERROR", f"No se pudo enviar el correo:\n{str(e)}")
+            messagebox.showerror("ERROR", f"The mail could not be sent.:\n{str(e)}")
