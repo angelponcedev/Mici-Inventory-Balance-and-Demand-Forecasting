@@ -54,6 +54,14 @@ def load_excel_data(file_path: str) -> Dict[str, pd.DataFrame]:
     excel_data["boundary_df"] = boundary_df
     return excel_data
 
+def get_weeks_from_columns(df: pd.DataFrame, quarter_label: str) -> List[str]:
+    """Extrae los nombres de las semanas (WW_XX) del nivel1 en las columnas del trimestre indicado."""
+    return [
+        col[1] for col in df.columns
+        if isinstance(col, tuple) and col[0] == quarter_label and str(col[1]).startswith("WW_")
+    ]
+
+
 def get_product_data(
     data: Dict[str, pd.DataFrame],
     product_id: str,
@@ -145,6 +153,7 @@ def get_product_data(
         return int(str(code).replace("WW_", ""))
     cap_cols_sorted = sorted(cap_cols, key=lambda x: _week_num(x[1]))
     product_data["available_capacity"] = rowb.loc[:, cap_cols_sorted].values.flatten().tolist()
+    product_data["week_labels"] = [col[1] for col in cap_cols_sorted]
 
     return product_data
 
@@ -209,7 +218,7 @@ def search(FILE_PATH):
                 # Write results to files
                 print(pdict)
 
-                write(WP, PRODUCT, QUARTER, FILE_PATH)
+                write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                 modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
                 #print(pdict)
                 
@@ -320,7 +329,7 @@ def search(FILE_PATH):
                     # 4) Escritura de resultados
                     print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, S={S}")
 
-                    write(WP, PRODUCT, QUARTER, FILE_PATH)
+                    write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
 
                 except KeyError as e:
@@ -389,7 +398,7 @@ def search_combined(FILE_PATH):
                     # Write results to files
                     print(pdict)
 
-                    write(WP, PRODUCT, QUARTER, FILE_PATH)
+                    write(WP, PRODUCT, QUARTER,  pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
                     #print(pdict)
                     
@@ -421,7 +430,7 @@ def search_combined(FILE_PATH):
                     # Write results to files
                     print(pdict)
 
-                    write(WP, PRODUCT, QUARTER, FILE_PATH)
+                    write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
                     #print(pdict)
                     
@@ -535,7 +544,7 @@ def search_combined(FILE_PATH):
                         # 4) Escritura de resultados
                         print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, S={S}")
 
-                        write(WP, PRODUCT, QUARTER, FILE_PATH)
+                        write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                         modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
 
                     except KeyError as e:
@@ -566,7 +575,7 @@ def search_combined(FILE_PATH):
                         # Write results to files
                         print(pdict)
 
-                        write(WP, PRODUCT, QUARTER, FILE_PATH)
+                        write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                         modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
                         #print(pdict)
                         
