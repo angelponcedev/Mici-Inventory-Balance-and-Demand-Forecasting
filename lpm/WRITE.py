@@ -1,12 +1,11 @@
 # search.py (assuming mpl returns the result object)
 import numpy as np
-import math
-import pandas 
 import pandas as pd
-import sys
 from openpyxl import load_workbook
+import csv 
+import os
 
-def write(result, producto, cuarto_inicio,output_path):
+def write(result, producto, cuarto_inicio, weeks, output_path):
 # --- Call the function and capture the result ---
 
     #output_path = r"D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21 W.xlsx"
@@ -44,6 +43,7 @@ def write(result, producto, cuarto_inicio,output_path):
         
     book.save(output_path)
     print("\n💾 ¡Archivo guardado correctamente!")
+    write2(result,producto,cuarto_inicio, weeks)
     return
 
 def modify(yieldedSupply, tpib, ibesst, producto, cuarto, output_path):
@@ -82,3 +82,47 @@ def modify(yieldedSupply, tpib, ibesst, producto, cuarto, output_path):
     sheet.cell(row=product_rows["ibesst"], column=col_inicio, value=float(ibesst))
     
     book.save(output_path)
+
+def write2(result, producto, cuarto_inicio, weeks):
+    nombre_archivo = "D:/Universidad/TalentLand/TalendLand25_2/Mici-Inventory-Balance-and-Demand-Forecasting/dataset/waferPlan.csv"
+    encabezados = ['Quarter', 'Week', 'Product', 'Wafers']
+    wafers = result
+    datos_nuevos = []
+
+    for idx, val in enumerate(wafers):
+        row = [
+            cuarto_inicio,
+            weeks[idx],
+            producto,
+            val
+        ]
+        datos_nuevos.append(row)
+
+    # Si el archivo existe, leer y filtrar por Quarter Y Product
+    if os.path.exists(nombre_archivo):
+        with open(nombre_archivo, mode='r', newline='', encoding='utf-8') as archivo_csv:
+            reader = csv.reader(archivo_csv)
+            filas_existentes = list(reader)
+
+        encabezado_leido = filas_existentes[0]
+        cuerpo = filas_existentes[1:]
+
+        # Filtrar filas que NO tengan el mismo cuarto Y producto
+        cuerpo_filtrado = [
+            fila for fila in cuerpo 
+            if not (fila[0] == cuarto_inicio and fila[2] == producto)
+        ]
+    else:
+        encabezado_leido = encabezados
+        cuerpo_filtrado = []
+
+    # Agregar los nuevos datos
+    cuerpo_actualizado = cuerpo_filtrado + datos_nuevos
+
+    # Sobrescribir el archivo completo con la combinación actualizada
+    with open(nombre_archivo, mode='w', newline='', encoding='utf-8') as archivo_csv:
+        writer = csv.writer(archivo_csv)
+        writer.writerow(encabezado_leido)
+        writer.writerows(cuerpo_actualizado)
+
+    print(f"Datos de '{producto}' en el cuarto '{cuarto_inicio}' actualizados correctamente.")
