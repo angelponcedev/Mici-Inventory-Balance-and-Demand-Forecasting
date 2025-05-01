@@ -115,17 +115,12 @@ def processDataset(input_data, weeklyDemandRatioInput):
         # --- Prepare for Sorting & Dates (Extract Year/Quarter Num) ---
     parse_errors = False # Flag to track if parsing issues occurred
     try:
-        # --- OLD Regex ---
-        # long_demand_df['Year_Str'] = long_demand_df['Quarter'].str.extract(r'(\d+)$')
-        # long_demand_df['Quarter_Str'] = long_demand_df['Quarter'].str.extract(r'Q(\d)')
 
         # --- NEW Regex for "Qx yy" format ---
         # Extract Quarter Number (the digit right after 'Q')
         long_demand_df['Quarter_Str'] = long_demand_df['Quarter'].str.extract(r'Q(\d)')
         # Extract Year Number (the two digits after the space at the end)
         long_demand_df['Year_Str'] = long_demand_df['Quarter'].str.extract(r' (\d{2})$')
-        # --- End of Regex Change ---
-
 
         # Check for initial parsing failures (NaNs after extract)
         initial_parse_failed = long_demand_df['Year_Str'].isnull() | long_demand_df['Quarter_Str'].isnull()

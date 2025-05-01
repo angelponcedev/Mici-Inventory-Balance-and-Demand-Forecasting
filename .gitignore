@@ -4,6 +4,7 @@ entorno/
 __pycache__/
 *.pyc
 /forecast/Practica-6_RegresionLinealSimple.ipynb
+/forecast/writingForecasts.ipynb
 .env
 OrTools.py
 Pruebas/

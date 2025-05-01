@@ -12,9 +12,10 @@ from forecast.forecast import generateCustomDemandForecast # Currently not implm
 from forecast.Xgboost import generateDemandForecast
 from boundaryPredictions.boundaryFactory import makeBoundaryPredictions 
 import subprocess
-from ventana_correo import AplicacionCorreo
+from Mail_Window import AplicacionCorreo
 from lpm.search import search
 from lpm.search import search_combined
+from excelHandling.writeColumnNames import writeColumnNames
 import os
 
 # --- Global Variables ---
@@ -369,7 +370,7 @@ def selectForecastPeriod():
 
     periodVar = IntVar(value=13) # Default to 13 weeks (1 quarter)
     # Provide weekly options (e.g., 1 quarter to 1 year)
-    week_options = [13, 26, 39, 52]
+    week_options = [13, 26, 39, 52, 65, 78, 91, 104, 117, 130, 143, 156]
     combo = ttk.Combobox(mainFrame, textvariable=periodVar, state="readonly",
                          values=week_options, width=10, font=("Arial", 10))
     combo.pack(pady=5)
@@ -410,7 +411,8 @@ def selectForecastPeriod():
     return periodWindow.selected_weeks # Return selected weeks
 
 def callForecasting():
-    global productsWithForecast, file
+    global productsWithForecast
+    
     generateForecastAndDisplay()
     generateBoundaryForecast()
     for product in productsWithForecast:
@@ -571,7 +573,7 @@ def writeBoundaryPredictions(predictions, producto, cuarto_inicio, file):
 
 def generateForecastAndDisplay():
     """Generates WEEKLY forecast and displays the first chart."""
-    global selectedProducts, cleanData, productsWithForecast, forecastWeeks
+    global selectedProducts, cleanData, productsWithForecast, forecastWeeks, file
 
     if not selectedProducts:
         messagebox.showwarning("Warning", "Please select products first.")
@@ -584,6 +586,13 @@ def generateForecastAndDisplay():
     if forecastWeeks is None:
         resultText.insert(tk.END, "\nForecast cancelled by user.\n")
         return
+    
+    #------ Adding columns to the file in accordance to forecastWeeks --------------------------
+    # Genearating column names for the file before passing it
+    # important this function returns a new filepath, this means the path inside file is changed to the output file
+    file = writeColumnNames(file=file,forecastHorizonWeeks=forecastWeeks,quantityOfProducts=len(selectedProducts))
+    
+    #-------------------------------------------------------------------------------------------
 
     try:
         resultText.insert(tk.END, f"\nGenerating forecast for {forecastWeeks} weeks...\n") # Update text
