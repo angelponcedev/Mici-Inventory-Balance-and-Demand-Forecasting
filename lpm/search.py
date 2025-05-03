@@ -160,7 +160,7 @@ def get_product_data(
 # ----------------------------
 # Bloque principal (ejemplo)
 # ----------------------------
-def search(FILE_PATH):
+def search(FILE_PATH,years,final_quarter):
 
     #FILE_PATH = "D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21.xlsx"
     #FILE_PATH = "../dataset/Hackaton DB Final 04.21.xlsx"
@@ -178,7 +178,7 @@ def search(FILE_PATH):
             # Skip Q1 and Q2 of the first year (95)
             if current_year == START_YEAR and current_quarter < 3:
                 continue
-            if current_year == 104 and current_quarter >1:
+            if current_year == (95+years) and current_quarter >final_quarter:
                 break
                 
             # Format quarter label
@@ -237,7 +237,7 @@ def search(FILE_PATH):
                 # Saltar Q1 y Q2 del primer año
                 if current_year == START_YEAR and current_quarter < 3:
                     continue
-                if current_year == 104 and current_quarter >1:
+                if current_year == (95+years) and current_quarter >final_quarter:
                     break
 
                 # Formatear etiqueta de trimestre
@@ -336,7 +336,7 @@ def search(FILE_PATH):
                     print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
                     continue
 
-def search_combined(FILE_PATH):
+def search_combined(FILE_PATH,years,final_quarter):
 
     #FILE_PATH = "D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21.xlsx"
     #FILE_PATH = "../dataset/Hackaton DB Final 04.21.xlsx"
@@ -346,7 +346,7 @@ def search_combined(FILE_PATH):
 
     all_data = load_excel_data(FILE_PATH)
 
-    for i in range(10):  # 8 years
+    for i in range(years):  # 8 years
         current_year = START_YEAR + i
         
         for j in range(4):  # 4 quarters per year
@@ -355,7 +355,7 @@ def search_combined(FILE_PATH):
             # Skip Q1 and Q2 of the first year (95)
             if current_year == START_YEAR and current_quarter < 3:
                 continue
-            if current_year == 104 and current_quarter >1:
+            if current_year == (95+years) and current_quarter >final_quarter:
                 break
 
             quarter_counter += 1
@@ -449,7 +449,7 @@ def search_combined(FILE_PATH):
                 # Saltar Q1 y Q2 del primer año
                 if current_year == START_YEAR and current_quarter < 3:
                     continue
-                if current_year == 104 and current_quarter >1:
+                if current_year == (95+years) and current_quarter >final_quarter:
                     break
 
                 quarter_counter += 1

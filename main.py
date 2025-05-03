@@ -17,6 +17,7 @@ from lpm.search import search
 from lpm.search import search_combined
 from excelHandling.writeColumnNames import writeColumnNames
 import os
+import math
 
 # --- Global Variables ---
 supplyDemandSheet = None # Supply_Demand sheet
@@ -421,8 +422,11 @@ def callForecasting():
              mape_str = f"{product.backtestMetrics.get('mape', 'N/A'):.2f}%" if isinstance(product.backtestMetrics.get('mape'), (int, float)) else product.backtestMetrics.get('error', 'N/A')
              print(f'Product {product.productID} boundaries ({len(product.boundaries)} total): {boundaries_str}')
              print(f'  Backtest MAPE: {mape_str}\n')
-             
-    search_combined(file)
+
+    quarters = math.ceil(forecastWeeks / 13)
+    years = quarters // 4      # División entera para obtener los años completos
+    quarter = quarters % 4
+    search_combined(file,years+9,quarter)
     
 def generateBoundaryForecast():
     """
