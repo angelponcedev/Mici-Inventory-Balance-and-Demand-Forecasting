@@ -84,7 +84,7 @@ def modify(yieldedSupply, tpib, ibesst, producto, cuarto, output_path):
     book.save(output_path)
 
 def write2(result, producto, cuarto_inicio, weeks):
-    nombre_archivo = "D:/Universidad/TalentLand/TalendLand25_2/Mici-Inventory-Balance-and-Demand-Forecasting/dataset/waferPlan.csv"
+    nombre_archivo = "D:/Users/SEARS/Desktop/UAA/6toSemestre/TalentLand/Talentland-2025-main/Talentland-2025-main/dataset/waferPlan.csv"
     encabezados = ['Quarter', 'Week', 'Product', 'Wafers']
     wafers = result
     datos_nuevos = []

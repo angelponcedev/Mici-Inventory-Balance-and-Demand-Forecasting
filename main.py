@@ -514,6 +514,71 @@ def writeForecastPredictions(predictions, producto, cuarto_inicio, file):
     print("\n💾 ¡Archivo guardado correctamente!")
     return
 
+def writeWOS(predictions, producto, cuarto_inicio, file):
+    """
+    Writes forecast predictions to an Excel file.
+    
+    Args:
+        predictions (list): List of boundary values to write
+        producto (str): Product ID (21A, 22B, or 23C)
+        cuarto_inicio (str): Starting quarter column header (e.g., 'Q1 04')
+        file (str): Path to the Excel file
+    
+    Returns:
+        None
+    """
+    # Set output path
+    output_path = rf"{file}"
+    
+    wosList = []
+    
+    for i in range(len(predictions)):
+        if producto == '21A':
+            wosList.append(1.82)
+        if producto == '22B':
+            wosList.append(1.56)
+        if producto == '23C':
+            wosList.append(1.42)
+    
+    # Load the Excel workbook
+    book = load_workbook(output_path, data_only=True)
+    sheet = book["Supply_Demand"]
+
+    # Determine the starting row based on product ID
+    if producto == "21A":
+        start_row = 4
+    elif producto == "22B":
+        start_row = 10
+    elif producto == "23C":
+        start_row = 16
+    else:
+        raise ValueError(f"Producto no reconocido: {producto}")
+
+    # Get the header row values from the first row
+    headers = [cell.value for cell in sheet[1]]  # First row in Excel (index 1)
+
+    try:
+        # Find the starting column based on the quarter header
+        col_inicio = headers.index(cuarto_inicio) + 1  # Excel uses 1-based indexing
+        print(f"\nSe encontró '{cuarto_inicio}' en la columna {col_inicio}.")
+
+        # Write each prediction value to the appropriate cell
+        print("\nEscribiendo valores:")
+        for i, value in enumerate(wosList):
+            col_actual = col_inicio + i
+            sheet.cell(row=start_row, column=col_actual, value=value)
+            #print(f"Celda ({start_row}, {col_actual}) ← {value}")
+
+    except ValueError:
+        # Handle case where the quarter header is not found
+        print(f"\nERROR: No se encontró el cuarto '{cuarto_inicio}' en los encabezados.")
+        print("Revisa si el texto coincide exactamente con lo que hay en la fila 1 del Excel (mayúsculas, espacios, etc).")
+    
+    # Save the workbook
+    book.save(output_path)
+    print("\n💾 ¡Archivo guardado correctamente!")
+    return
+
 
 def writeBoundaryPredictions(predictions, producto, cuarto_inicio, file):
     """
@@ -630,6 +695,14 @@ def generateForecastAndDisplay():
             
             # Write quarterly demand predictions to file
             writeForecastPredictions(
+                predictions=quartersDemand,
+                producto=product.productID,
+                cuarto_inicio='Q1 04',
+                file=file
+            )
+            
+            # Write wos constant to file for each product
+            writeWOS(
                 predictions=quartersDemand,
                 producto=product.productID,
                 cuarto_inicio='Q1 04',
