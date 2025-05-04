@@ -15,7 +15,7 @@ import subprocess
 from Mail_Window import AplicacionCorreo
 from lpm.search import search
 from lpm.search import search_combined
-from excelHandling.writeColumnNames import writeColumnNames
+from excelHandling.writeMissingData import writeMissingData, generateSST
 import os
 import math
 
@@ -412,7 +412,7 @@ def selectForecastPeriod():
     return periodWindow.selected_weeks # Return selected weeks
 
 def callForecasting():
-    global productsWithForecast
+    global productsWithForecast, file
     
     generateForecastAndDisplay()
     generateBoundaryForecast()
@@ -423,10 +423,14 @@ def callForecasting():
              print(f'Product {product.productID} boundaries ({len(product.boundaries)} total): {boundaries_str}')
              print(f'  Backtest MAPE: {mape_str}\n')
 
+    # Writing SST before doing the LPM proccesing
+    generateSST(file=file, productsWithForecast=productsWithForecast)
+
     quarters = math.ceil(forecastWeeks / 13)
     years = quarters // 4      # División entera para obtener los años completos
     quarter = quarters % 4
-    search_combined(file,years+9,quarter)
+    #search_combined(file,years+9,quarter)
+    search(file,years+9,quarter)
     
 def generateBoundaryForecast():
     """
@@ -659,7 +663,7 @@ def generateForecastAndDisplay():
     #------ Adding columns to the file in accordance to forecastWeeks --------------------------
     # Genearating column names for the file before passing it
     # important this function returns a new filepath, this means the path inside file is changed to the output file
-    file = writeColumnNames(file=file,forecastHorizonWeeks=forecastWeeks,quantityOfProducts=len(selectedProducts))
+    file = writeMissingData(file=file,forecastHorizonWeeks=forecastWeeks,quantityOfProducts=len(selectedProducts))
     
     #-------------------------------------------------------------------------------------------
 
