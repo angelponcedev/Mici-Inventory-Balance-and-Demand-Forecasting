@@ -431,6 +431,9 @@ def callForecasting():
     quarter = quarters % 4
     #search_combined(file,years+9,quarter)
     search(file,years+9,quarter)
+    # The solution has been written and now the user can open the result excel file
+    messagebox.showinfo("Success", f"The program has written the solution wafer plan into {file}, now you can open the file to see the results.")
+    
     
 def generateBoundaryForecast():
     """
