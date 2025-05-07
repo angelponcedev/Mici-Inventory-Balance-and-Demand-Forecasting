@@ -448,6 +448,7 @@ def callForecasting():
     # Ejecutar en un hilo separado para no bloquear la interfaz
     import threading
     threading.Thread(target=lambda:search(file,years+9,quarter, log)).start()
+    
     root.mainloop()
     # The solution has been written and now the user can open the result excel file
     messagebox.showinfo("Success", f"The program has written the solution wafer plan into {file}, now you can open the file to see the results.")
