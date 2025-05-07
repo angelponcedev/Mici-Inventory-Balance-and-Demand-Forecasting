@@ -4,6 +4,21 @@ from typing import Dict, Any, List, Tuple
 from lpm.lpm import mpl
 from lpm.WRITE import write , modify
 from lpm.lpm import mpl0
+import tkinter as tk
+from tkinter.scrolledtext import ScrolledText
+
+def init_log_window():
+    root = tk.Tk()
+    root.title("Log de Ejecución")
+    text_area = ScrolledText(root, width=100, height=30)
+    text_area.pack()
+
+    def log(msg: str):
+        text_area.insert(tk.END, msg + "\n")
+        text_area.see(tk.END)  # Auto-scroll
+
+    return root, log
+
 
 def load_excel_data(file_path: str) -> Dict[str, pd.DataFrame]:
     """Carga todas las hojas necesarias del Excel en un dict."""
@@ -160,7 +175,7 @@ def get_product_data(
 # ----------------------------
 # Bloque principal (ejemplo)
 # ----------------------------
-def search(FILE_PATH,years,final_quarter):
+def search(FILE_PATH,years,final_quarter,log=print):
 
     #FILE_PATH = "D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21.xlsx"
     #FILE_PATH = "../dataset/Hackaton DB Final 04.21.xlsx"
@@ -168,12 +183,14 @@ def search(FILE_PATH,years,final_quarter):
     START_YEAR = 95     # para '95
 
     all_data = load_excel_data(FILE_PATH)
-
-    for i in range(10):  # 8 years
+    log(f"Line 186: Starting for loop with: {years}")
+    
+    for i in range(years):  # 8 years
         current_year = START_YEAR + i
-        
+        log(f"Line 188: Set the current year: {current_year}")
         for j in range(4):  # 4 quarters per year
             current_quarter = j + 1
+            log(f"Line 192: Set the current quarter: {current_quarter}")
             
             # Skip Q1 and Q2 of the first year (95)
             if current_year == START_YEAR and current_quarter < 3:
@@ -191,13 +208,15 @@ def search(FILE_PATH,years,final_quarter):
                 QUARTER = f"Q{current_quarter} {current_year}"
             
             PRODUCT = PRODUCTS[0]
+            log(f"Product to process: {PRODUCT}")
             
             # Get product data for the current quarter
             try:
                 all_data = load_excel_data(FILE_PATH)
                 pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
                 print(f"Processing: {PRODUCT}, {QUARTER}")
-                
+                log(f"Line 214: Get the data from the excel: {pdict}")
+
                 WP, YS, TPIB, IBESST,S = mpl(
                     n=len(pdict["available_capacity"]),
                     safetyStockTarget=pdict["safety_stock"],
@@ -215,23 +234,31 @@ def search(FILE_PATH,years,final_quarter):
                 
                 print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
                 
+                log(f"Line 218: Calling the MPL")
+                log(f"Solution was: {S}")
+                log(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
+
                 # Write results to files
                 print(pdict)
 
                 write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                 modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+                log(f"Line 243: Calling function write")
+                log(f"Line 244: Calling function modify")
                 #print(pdict)
                 
             except KeyError as e:
-                print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                log(f"Error processing {PRODUCT}, {QUARTER}: {e}")
                 continue  # Skip to next iteration if data is missing
 
     START_YEAR = 95
         # — Procesar productos 2 y 3 con lógica de rescate de capacidad —
     for l in range(1, 3):
         PRODUCT = PRODUCTS[l]
-        for i in range(10):  # 8 años
+        log(f"Producto a procesar: {PRODUCT}")
+        for i in range(years):  # 8 años
             current_year = START_YEAR + i
+            log(f"Line 258: Set the current year: {current_year}")
             for j in range(4):  # 4 trimestres
                 current_quarter = j + 1
                 # Saltar Q1 y Q2 del primer año
@@ -255,6 +282,7 @@ def search(FILE_PATH,years,final_quarter):
                     all_data = load_excel_data(FILE_PATH)
                     pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
                     print(f"Processing: {PRODUCT}, {QUARTER}")
+                    log(f"Line 282: Get the data from the excel: {pdict}")
 
                     # 1) Primera llamada a mpl
                     WP, YS, TPIB, IBESST, S = mpl(
@@ -271,6 +299,9 @@ def search(FILE_PATH,years,final_quarter):
                         min=70000000,
                         max=140000000,
                     )
+                    log(f"Line 218: Calling the MPL")
+                    log(f"Solution was: {S}")
+                    log(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
 
                     # 2) Si falla (S == False) y hay un producto anterior, aplico rescate
                     if not S and l > 0:
@@ -278,6 +309,7 @@ def search(FILE_PATH,years,final_quarter):
                         pdict_prev = get_product_data(
                             all_data, prev_prod, current_quarter, current_year
                         )
+                        log(f"Line 305: Function to try to give leftover wafers from the previous product")
                         # mpl del anterior para obtener WP_prev
                         WP_prev, _, _, _, S_prev = mpl(
                             n=len(pdict_prev["available_capacity"]),
@@ -331,54 +363,50 @@ def search(FILE_PATH,years,final_quarter):
 
                     write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
+                    log(f"Line 262 Calling function write")
+                    log(f"Line 263: Calling function modify")
 
                 except KeyError as e:
-                    print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                    log(f"Error processing {PRODUCT}, {QUARTER}: {e}")
                     continue
 
-def search_combined(FILE_PATH,years,final_quarter):
-
-    #FILE_PATH = "D:/Universidad/TalentLand/LPM/Hackaton DB Final 04.21.xlsx"
-    #FILE_PATH = "../dataset/Hackaton DB Final 04.21.xlsx"
-    PRODUCTS = ["21A","22B","23C"]  # ,"22B","23C"
-    START_YEAR = 95     # para '95
+def search_combined(FILE_PATH, years, final_quarter, log=print):
+    PRODUCTS = ["21A", "22B", "23C"]
+    START_YEAR = 95
     quarter_counter = 0
 
+    log("Loading Excel data...")
     all_data = load_excel_data(FILE_PATH)
 
-    for i in range(years):  # 8 years
+    for i in range(years):
         current_year = START_YEAR + i
-        
-        for j in range(4):  # 4 quarters per year
+
+        for j in range(4):
             current_quarter = j + 1
-            
-            # Skip Q1 and Q2 of the first year (95)
+
             if current_year == START_YEAR and current_quarter < 3:
                 continue
-            if current_year == (95+years) and current_quarter >final_quarter:
+            if current_year == (95 + years) and current_quarter > final_quarter:
                 break
 
             quarter_counter += 1
-                
-            # Format quarter label
+
             if current_year > 99:
-                # Handle years 100+
                 display_year = f"0{current_year - 100}" if current_year < 110 else f"{current_year - 100}"
-                #current_year=display_year
                 QUARTER = f"Q{current_quarter} {display_year}"
             else:
                 QUARTER = f"Q{current_quarter} {current_year}"
-            
+
             PRODUCT = PRODUCTS[0]
-            
-            if quarter_counter <=34:
-            # Get product data for the current quarter
+
+            if quarter_counter <= 34:
                 try:
+                    log(f"[{QUARTER}] Loading data for {PRODUCT}...")
                     all_data = load_excel_data(FILE_PATH)
                     pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
-                    print(f"Processing: {PRODUCT}, {QUARTER}")
-                    
-                    WP, YS, TPIB, IBESST,S = mpl(
+                    log(f"[{QUARTER}] Processing {PRODUCT} with `mpl`...")
+
+                    WP, YS, TPIB, IBESST, S = mpl(
                         n=len(pdict["available_capacity"]),
                         safetyStockTarget=pdict["safety_stock"],
                         totalDemand=pdict["total_demand"],
@@ -392,27 +420,23 @@ def search_combined(FILE_PATH,years,final_quarter):
                         min=70000000,
                         max=140000000,
                     )
-                    
-                    print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
-                    
-                    # Write results to files
-                    print(pdict)
 
-                    write(WP, PRODUCT, QUARTER,  pdict["week_labels"], FILE_PATH)
+                    log(f"[{QUARTER}] Results for {PRODUCT}: YS={YS}, TPIB={TPIB}, IBESST={IBESST}")
+                    write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
-                    #print(pdict)
-                    
+
                 except KeyError as e:
-                    print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
-                    continue  # Skip to next iteration if data is missing
+                    log(f"[{QUARTER}] Error processing {PRODUCT}: {e}")
+                    continue
 
             else:
                 try:
+                    log(f"[{QUARTER}] Loading data for {PRODUCT} (mpl0)...")
                     all_data = load_excel_data(FILE_PATH)
                     pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
-                    print(f"Processing: {PRODUCT}, {QUARTER}")
-                    
-                    WP, YS, TPIB, IBESST,S = mpl0(
+                    log(f"[{QUARTER}] Processing {PRODUCT} with `mpl0`...")
+
+                    WP, YS, TPIB, IBESST, S = mpl0(
                         n=len(pdict["available_capacity"]),
                         safetyStockTarget=pdict["safety_stock"],
                         totalDemand=pdict["total_demand"],
@@ -424,54 +448,43 @@ def search_combined(FILE_PATH,years,final_quarter):
                         maxDecrease=560,
                         weeklyDemandRatio=pdict["weekly_ratio"],
                     )
-                    
-                    print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
-                    
-                    # Write results to files
-                    print(pdict)
 
+                    log(f"[{QUARTER}] Results for {PRODUCT}: YS={YS}, TPIB={TPIB}, IBESST={IBESST}")
                     write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                     modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
-                    #print(pdict)
-                    
+
                 except KeyError as e:
-                    print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
-                    continue  # Skip to next iteration if data is missing
+                    log(f"[{QUARTER}] Error processing {PRODUCT}: {e}")
+                    continue
 
     START_YEAR = 95
-        # — Procesar productos 2 y 3 con lógica de rescate de capacidad —
     for l in range(1, 3):
         PRODUCT = PRODUCTS[l]
-        for i in range(10):  # 8 años
+        for i in range(10):
             current_year = START_YEAR + i
-            for j in range(4):  # 4 trimestres
+            for j in range(4):
                 current_quarter = j + 1
-                # Saltar Q1 y Q2 del primer año
+
                 if current_year == START_YEAR and current_quarter < 3:
                     continue
-                if current_year == (95+years) and current_quarter >final_quarter:
+                if current_year == (95 + years) and current_quarter > final_quarter:
                     break
 
                 quarter_counter += 1
 
-                # Formatear etiqueta de trimestre
                 if current_year > 99:
-                    display_year = (
-                        f"0{current_year - 100}"
-                        if current_year < 110
-                        else f"{current_year - 100}"
-                    )
+                    display_year = f"0{current_year - 100}" if current_year < 110 else f"{current_year - 100}"
                 else:
                     display_year = f"{current_year}"
                 QUARTER = f"Q{current_quarter} {display_year}"
 
-                if quarter_counter <=34:
+                if quarter_counter <= 34:
                     try:
+                        log(f"[{QUARTER}] Loading data for {PRODUCT}...")
                         all_data = load_excel_data(FILE_PATH)
                         pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
-                        print(f"Processing: {PRODUCT}, {QUARTER}")
+                        log(f"[{QUARTER}] Processing {PRODUCT} with `mpl`...")
 
-                        # 1) Primera llamada a mpl
                         WP, YS, TPIB, IBESST, S = mpl(
                             n=len(pdict["available_capacity"]),
                             safetyStockTarget=pdict["safety_stock"],
@@ -487,13 +500,11 @@ def search_combined(FILE_PATH,years,final_quarter):
                             max=140000000,
                         )
 
-                        # 2) Si falla (S == False) y hay un producto anterior, aplico rescate
                         if not S and l > 0:
                             prev_prod = PRODUCTS[l - 1]
-                            pdict_prev = get_product_data(
-                                all_data, prev_prod, current_quarter, current_year
-                            )
-                            # mpl del anterior para obtener WP_prev
+                            log(f"[{QUARTER}] Attempting capacity rescue from {prev_prod}...")
+                            pdict_prev = get_product_data(all_data, prev_prod, current_quarter, current_year)
+
                             WP_prev, _, _, _, S_prev = mpl(
                                 n=len(pdict_prev["available_capacity"]),
                                 safetyStockTarget=pdict_prev["safety_stock"],
@@ -509,23 +520,10 @@ def search_combined(FILE_PATH,years,final_quarter):
                                 max=140000000,
                             )
 
-                            # Calcular sobrantes semana a semana
-                            leftover = [
-                                prev_cap - used
-                                for prev_cap, used in zip(
-                                    pdict_prev["available_capacity"], WP_prev
-                                )
-                            ]
+                            leftover = [prev_cap - used for prev_cap, used in zip(pdict_prev["available_capacity"], WP_prev)]
+                            pdict["available_capacity"] = [curr_cap + extra for curr_cap, extra in zip(pdict["available_capacity"], leftover)]
 
-                            # Ajustar capacidad disponible del producto actual
-                            pdict["available_capacity"] = [
-                                curr_cap + extra
-                                for curr_cap, extra in zip(
-                                    pdict["available_capacity"], leftover
-                                )
-                            ]
-
-                            # 3) Reintentar mpl con la capacidad ajustada
+                            log(f"[{QUARTER}] Retrying `mpl` with adjusted capacity...")
                             WP, YS, TPIB, IBESST, S = mpl(
                                 n=len(pdict["available_capacity"]),
                                 safetyStockTarget=pdict["safety_stock"],
@@ -541,23 +539,22 @@ def search_combined(FILE_PATH,years,final_quarter):
                                 max=140000000,
                             )
 
-                        # 4) Escritura de resultados
-                        print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, S={S}")
-
+                        log(f"[{QUARTER}] Results for {PRODUCT}: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, S={S}")
                         write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                         modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
 
                     except KeyError as e:
-                        print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
+                        log(f"[{QUARTER}] Error processing {PRODUCT}: {e}")
                         continue
 
                 else:
                     try:
+                        log(f"[{QUARTER}] Loading data for {PRODUCT} (mpl0)...")
                         all_data = load_excel_data(FILE_PATH)
                         pdict = get_product_data(all_data, PRODUCT, current_quarter, current_year)
-                        print(f"Processing: {PRODUCT}, {QUARTER}")
-                        
-                        WP, YS, TPIB, IBESST,S = mpl0(
+                        log(f"[{QUARTER}] Processing {PRODUCT} with `mpl0`...")
+
+                        WP, YS, TPIB, IBESST, S = mpl0(
                             n=len(pdict["available_capacity"]),
                             safetyStockTarget=pdict["safety_stock"],
                             totalDemand=pdict["total_demand"],
@@ -569,16 +566,11 @@ def search_combined(FILE_PATH,years,final_quarter):
                             maxDecrease=560,
                             weeklyDemandRatio=pdict["weekly_ratio"],
                         )
-                        
-                        print(f"Results: YS={YS}, TPIB={TPIB}, IBESST={IBESST}, for {PRODUCT}, {QUARTER}")
-                        
-                        # Write results to files
-                        print(pdict)
 
+                        log(f"[{QUARTER}] Results for {PRODUCT}: YS={YS}, TPIB={TPIB}, IBESST={IBESST}")
                         write(WP, PRODUCT, QUARTER, pdict["week_labels"], FILE_PATH)
                         modify(YS, TPIB, IBESST, PRODUCT, QUARTER, FILE_PATH)
-                        #print(pdict)
-                        
+
                     except KeyError as e:
-                        print(f"Error processing {PRODUCT}, {QUARTER}: {e}")
-                        continue  # Skip to next iteration if data is missing
+                        log(f"[{QUARTER}] Error processing {PRODUCT}: {e}")
+                        continue
