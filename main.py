@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, Label, Text, Frame, Button, Canvas, Scrollbar, Radiobutton, Entry, Toplevel, IntVar, StringVar, BooleanVar
+from tkinter import filedialog, messagebox, ttk, Label, Text, Frame, Button, Canvas, Scrollbar, Radiobutton, Entry, Toplevel, IntVar, StringVar, BooleanVar, scrolledtext
+from tkinter.scrolledtext import ScrolledText
 from PIL import Image, ImageTk
 import pandas as pd
 import numpy as np
@@ -31,6 +32,19 @@ cleanData = None # Stores the processed WEEKLY data suitable for forecasting
 selectedProducts = [] # List of product IDs selected by the user
 productsWithForecast = None # List of Product objects with WEEKLY forecast results
 file = None
+
+def init_log_window():
+    root = tk.Tk()
+    root.title("Log de Ejecución")
+    text_area = ScrolledText(root, width=100, height=30)
+    text_area.pack()
+
+    def log(msg: str):
+        text_area.insert(tk.END, msg + "\n")
+        text_area.see(tk.END)  # Auto-scroll
+
+    return root, log
+
 
 def guardar_predicciones_para_powerbi(productos_forecast, nombre_csv="predicciones_forecast.csv", nombre_pbix="plantilla_forecast.pbix"):
     try:
@@ -426,7 +440,13 @@ def callForecasting():
     quarters = math.ceil(forecastWeeks / 13)
     years = quarters // 4      # División entera para obtener los años completos
     quarter = quarters % 4
-    search_combined(file,years+9,quarter)
+    root, log = init_log_window()
+
+    # Ejecutar en un hilo separado para no bloquear la interfaz
+    import threading
+    threading.Thread(target=lambda:search(file,years+9,quarter, log)).start()
+    root.mainloop()
+    
     
 def generateBoundaryForecast():
     """
