@@ -109,7 +109,7 @@ Talentland-2025/
 
 ## License
 
-Distributed under the MIT License towards Micron SemiConductors. See `LICENSE` file for more details (if one exists in the repository).
+Distributed under the MIT License towards Micron SemiConductors. See `LICENSE` file for more details.
 
 ---
 

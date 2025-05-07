@@ -4,7 +4,7 @@ import re
 import math
 from datetime import datetime, timedelta
 
-def writeColumnNames(file, forecastHorizonWeeks, quantityOfProducts):
+def writeMissingData(file, forecastHorizonWeeks, quantityOfProducts):
     # All the forecasts will be written into a new file
     newFileAdress = file.replace(".xlsx"," WaferPlan + Forecasts.xlsx")
     # Loading base excel to work with
@@ -435,6 +435,95 @@ def yieldFilling(ws,forecastHorizonWeeks,quantityOfProducts):
             ws[target_cell] = current_week_yield
             
     return ws
+
+
+def generateSST(file, productsWithForecast):
+    try:
+        wb = load_workbook(file)
+    except FileNotFoundError:
+        print(f'Couldnt load File {file} as excel workbook')
+        return
+    except Exception as e:
+        print(f'An exception ocurred while proccesing {file}, error: {e}')
+        
+    if 'wb' in locals() and wb is not None:    
+        try:
+            ws = wb['Supply_Demand']
+            print("Successfully loaded 'Supply_Demand' sheet.")
+            # You can now work with the 'ws' object
+        except KeyError:
+            # This is the specific error if the sheet name doesn't exist
+            print(f"Error: Sheet 'Supply_Demand' not found in workbook '{file}'.")
+            return
+        
+        except Exception as e:
+            # Catch any other unexpected errors accessing the sheet
+            print(f"Error accessing sheet 'Supply_Demand' in workbook '{file}': {e}")
+            return
+    else:
+        print("Workbook was not loaded, cannot access sheet.")
+            
+    # In this point of the function the workbook and worksheet are loaded
+    #getting the last dimension of the sheet
+    print('Proccesing ',ws.title)
+    
+    dimensions = ws.calculate_dimension()
+
+    dimensions = dimensions.split(':')
+
+    lastDimension = dimensions[1]
+
+    col_part = ""
+    row_part = ""
+    split_index = -1
+
+    for i, char in enumerate(lastDimension):
+        # Check if the character is a digit
+        if char.isdigit(): # Or: if char in string.digits:
+            split_index = i
+            break # Stop as soon as we find the first digit
+
+    if split_index != -1:
+        col_part = lastDimension[:split_index] # Slice from start up to (not including) the digit
+        row_part = lastDimension[split_index:] # Slice from the digit to the end
+    else:
+        # Handle cases where there might be no numbers (though unlikely for cell refs)
+        col_part = lastDimension
+        row_part = "" # Or raise an error, depending on requirements
+
+    print(f"Original: {lastDimension}")
+    print(f"Column Part: {col_part}")
+    print(f"Row Part: {row_part}")
+    
+    lastDimensionInteger = column_index_from_string(col_part)
+    
+    # filling the sst for each product    
+    for product in productsWithForecast:
+        if product.productID == '21A':
+            row_part = 3
+        elif product.productID == '22B':
+            row_part = 9
+        elif product.productID == '23C':
+            row_part = 15
+                    
+        demand_row = row_part + 2
+        wos_row = row_part + 1
+        weeks = 13
+        starting_index = 3
+        for i in range(starting_index,lastDimensionInteger):
+            col_part = get_column_letter(i)
+            next_col = get_column_letter(i+1)
+            next_Demand = ws[next_col + str(demand_row)].value
+            if math.isnan(next_Demand): 
+                this_Quarter_Demand = ws[col_part + str(demand_row)].value
+                ws[col_part + str(row_part)].value = (this_Quarter_Demand/weeks)*ws[col_part + str(wos_row)].value
+            else:
+                ws[col_part + str(row_part)].value = (next_Demand/weeks)*ws[col_part + str(wos_row)].value
+            
+        else:
+            pass
+        wb.save(file)
+    return
 
 def get_next_quarter(quarter_str):
     """
