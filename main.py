@@ -1182,7 +1182,7 @@ Radiobutton(lpmOptionsFrame, text="Option 3", variable=lpmOptionVar, value="opti
 footerFrame = Frame(contentFrame, bg="#E0E0E0", height=30)
 footerFrame.pack(fill=tk.X, side=tk.BOTTOM, pady=(15, 0), padx=20)
 footerFrame.pack_propagate(False)
-footerLabel = Label(footerFrame, text="MICI - Weekly Demand Forecasting System v2.1 | Powered by Gemini Pro", font=("Arial", 8), fg="#555", bg="#E0E0E0") # Updated footer text
+footerLabel = Label(footerFrame, text="MICI - Inventory Balance and Demand Forecasting System", font=("Arial", 8), fg="#555", bg="#E0E0E0") # Updated footer text
 footerLabel.pack(pady=5)
 
 # --- Final Initialization ---
